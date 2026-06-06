@@ -3191,9 +3191,16 @@ const AdminPanel = ({ config, save, add, del, upd, events, recipes, xsitePages, 
 
   const sendNotification=async()=>{
     if(!notif.message)return alert("Message vide");
-    let scheduledISO=undefined;
-    if(schedDate&&schedTime) scheduledISO=new Date(`${schedDate}T${schedTime}`).toISOString();
-    await addDoc(collection(db,'notifications'),{...notif,targets:notif.targets?.length?notif.targets:['all'],scheduledFor:scheduledISO,createdAt:new Date().toISOString(),readBy:{}});
+    const scheduledISO = (schedDate && schedTime)
+  ? new Date(`${schedDate}T${schedTime}`).toISOString()
+  : null;
+await addDoc(collection(db,'notifications'),{
+  ...notif,
+  targets: notif.targets?.length ? notif.targets : ['all'],
+  ...(scheduledISO ? { scheduledFor: scheduledISO } : {}),
+  createdAt: new Date().toISOString(),
+  readBy: {}
+});
     setNotif({message:'',type:'info',repeat:'once',linkView:'',linkId:'',targets:['all']});
     setSchedDate('');setSchedTime('');
     alert("Notification envoyée/programmée !");
