@@ -33,21 +33,28 @@ export const activerNotifications = async () => {
       return;
     }
 
-    // 2. Enregistrer manuellement le Service Worker pour éviter l'erreur 404 sur GitHub Pages
-    // Note : Assurez-vous d'avoir déplacé le fichier firebase-messaging-sw.js dans le dossier /public !
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-      scope: '/'
+    // 2. Gestion dynamique du chemin GitHub Pages pour éviter l'erreur 404
+    // Si on est sur github.io, on ajoute le nom du dépôt, sinon on reste à la racine (localhost)
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    const baseSubFolder = isGitHubPages ? '/chaud-devant-81afb/' : '/';
+    const swPath = `${baseSubFolder}firebase-messaging-sw.js`;
+
+    console.log("Tentative d'enregistrement du Service Worker sur :", swPath);
+
+    // 3. Enregistrer le Service Worker avec le bon scope
+    const registration = await navigator.serviceWorker.register(swPath, {
+      scope: baseSubFolder
     });
 
-    console.log('Service Worker Firebase enregistré avec succès !');
+    console.log('Service Worker Firebase enregistré avec succès ! Scope:', registration.scope);
 
-    // 3. Initialiser le module de messagerie Firebase
+    // 4. Initialiser le module de messagerie Firebase
     const messaging = getMessaging(app);
 
-    // 4. Récupérer le Token de l'appareil en lui passant l'enregistrement du Service Worker
+    // 5. Récupérer le Token de l'appareil
     const token = await getToken(messaging, {
       vapidKey: import.meta.env.VITE_VAPID_KEY || '',
-      serviceWorkerRegistration: registration // Ligne cruciale pour lier le fichier lié
+      serviceWorkerRegistration: registration // Associe le token au service worker enregistré
     });
 
     if (token) {
