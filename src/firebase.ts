@@ -26,14 +26,34 @@ export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 export const activerNotifications = async () => {
   try {
+    // 1. Demander la permission à l'utilisateur
     const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return;
-    const messaging = getMessaging(app);
-    const token = await getToken(messaging, {
-      vapidKey: import.meta.env.VITE_VAPID_KEY || ''
+    if (permission !== 'granted') {
+      console.log('Permission de notification refusée.');
+      return;
+    }
+
+    // 2. Enregistrer manuellement le Service Worker pour éviter l'erreur 404 sur GitHub Pages
+    // Note : Assurez-vous d'avoir déplacé le fichier firebase-messaging-sw.js dans le dossier /public !
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+      scope: '/'
     });
+
+    console.log('Service Worker Firebase enregistré avec succès !');
+
+    // 3. Initialiser le module de messagerie Firebase
+    const messaging = getMessaging(app);
+
+    // 4. Récupérer le Token de l'appareil en lui passant l'enregistrement du Service Worker
+    const token = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_VAPID_KEY || '',
+      serviceWorkerRegistration: registration // Ligne cruciale pour lier le fichier lié
+    });
+
     if (token) {
-      console.log('Token FCM :', token);
+      console.log('Token FCM récupéré avec succès :', token);
+    } else {
+      console.log('Aucun token disponible.');
     }
   } catch (e) {
     console.error('Erreur notifications :', e);
