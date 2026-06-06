@@ -67,7 +67,6 @@ export const activerNotifications = async () => {
 
     if (token) {
       console.log('Token FCM récupéré avec succès :', token);
-      alert("TOKEN MOBILE : " + token);
       // Astuce : C'est ici que vous pourrez ajouter le code pour enregistrer ce token dans Firestore
     } else {
       console.log('Aucun token disponible. Vérifiez la configuration de la clé VAPID.');
