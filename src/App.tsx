@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { auth, googleProvider, db, GOOGLE_CLIENT_ID } from './firebase';
+import { auth, googleProvider, db, GOOGLE_CLIENT_ID, activerNotifications } from './firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, User, GoogleAuthProvider } from 'firebase/auth';
 
 // Fournisseur OAuth dédié Google Calendar (scope events)
@@ -5060,6 +5060,10 @@ const GithubConfigPanel = ({ db }: { db: any }) => {
 };
 
 const App: React.FC = () => {
+  useEffect(() => {
+    activerNotifications();
+  }, []);
+
   const [user, setUser] = useState<User|null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [config, setConfig] = useState<SiteConfig>(ORIGINAL_CONFIG);
