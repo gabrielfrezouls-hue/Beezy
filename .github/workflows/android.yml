@@ -1,7 +1,7 @@
 name: Build Android APK
 on:
   push:
-    branches: [ main, master ] # Se déclenche quand vous poussez du code
+    branches: [ main, master ] # Se déclenche dès que vous enregistrez
 
 jobs:
   build:
@@ -25,6 +25,7 @@ jobs:
         env:
           VITE_FIREBASE_KEY: ${{ secrets.VITE_FIREBASE_KEY }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_GEMINI_KEY: ${{ secrets.VITE_GEMINI_KEY }}
           VITE_VAPID_KEY: ${{ secrets.VITE_VAPID_KEY }}
 
       - name: Capacitor Sync
