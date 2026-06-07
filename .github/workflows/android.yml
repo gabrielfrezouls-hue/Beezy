@@ -1,7 +1,7 @@
 name: Build Android APK
 on:
   push:
-    branches: [ main, master ] # Se déclenche dès que vous enregistrez
+    branches: [ main, master ] # Se déclenche dès que vous enregistrez du code sur votre branche principale
 
 jobs:
   build:
@@ -38,7 +38,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21' # Corrigé ici : Passage en Java 21 pour éviter l'échec de compilation
 
       - name: Build APK
         run: |
