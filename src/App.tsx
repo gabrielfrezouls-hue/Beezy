@@ -78,16 +78,112 @@ const VIEW_ANCHORS: Record<string,{label:string,id:string}[]> = {
   wishlist:[{label:'Mes listes',id:'wishlist-top'}]
 };
 
+// --- SYSTÈME DE THÈMES BEEZY (LA RUCHE) ---
+export interface BeezyThemePreset {
+  id: string;
+  name: string;
+  emoji: string;
+  primaryColor: string;
+  backgroundColor: string;
+  cardBg: string;
+  textColor: string;
+  accentBadge: string;
+  borderHex: string;
+}
+
+export const BEEZY_THEMES: Record<string, BeezyThemePreset> = {
+  miel: {
+    id: 'miel',
+    name: 'Miel Doré (Beezy)',
+    emoji: '🐝',
+    primaryColor: '#d97706',
+    backgroundColor: '#fefce8',
+    cardBg: 'rgba(255, 255, 255, 0.82)',
+    textColor: '#1c1917',
+    accentBadge: '#fef3c7',
+    borderHex: 'rgba(245, 158, 11, 0.3)',
+  },
+  gelee_royale: {
+    id: 'gelee_royale',
+    name: 'Gelée Royale Ambrée',
+    emoji: '👑',
+    primaryColor: '#b45309',
+    backgroundColor: '#fffbeb',
+    cardBg: 'rgba(255, 251, 235, 0.85)',
+    textColor: '#292524',
+    accentBadge: '#fde68a',
+    borderHex: 'rgba(180, 83, 9, 0.3)',
+  },
+  ruche_nuit: {
+    id: 'ruche_nuit',
+    name: 'Nuit à la Ruche',
+    emoji: '🌙',
+    primaryColor: '#f59e0b',
+    backgroundColor: '#1c1917',
+    cardBg: 'rgba(41, 37, 36, 0.88)',
+    textColor: '#fef3c7',
+    accentBadge: '#451a03',
+    borderHex: 'rgba(245, 158, 11, 0.4)',
+  },
+  prairie: {
+    id: 'prairie',
+    name: 'Prairie Fleurie',
+    emoji: '🌻',
+    primaryColor: '#15803d',
+    backgroundColor: '#f0fdf4',
+    cardBg: 'rgba(255, 255, 255, 0.85)',
+    textColor: '#14532d',
+    accentBadge: '#dcfce7',
+    borderHex: 'rgba(21, 128, 61, 0.25)',
+  },
+  lavande: {
+    id: 'lavande',
+    name: 'Miel de Lavande',
+    emoji: '🪻',
+    primaryColor: '#7e22ce',
+    backgroundColor: '#faf5ff',
+    cardBg: 'rgba(255, 255, 255, 0.85)',
+    textColor: '#3b0764',
+    accentBadge: '#f3e8ff',
+    borderHex: 'rgba(126, 34, 206, 0.25)',
+  },
+  terracotta: {
+    id: 'terracotta',
+    name: 'Chaud Devant Classic',
+    emoji: '🔥',
+    primaryColor: '#a85c48',
+    backgroundColor: '#f5ede7',
+    cardBg: 'rgba(255, 255, 255, 0.78)',
+    textColor: '#1c1917',
+    accentBadge: '#ffedd5',
+    borderHex: 'rgba(168, 92, 72, 0.25)',
+  },
+};
+
 // --- CONFIG PAR DÉFAUT ---
 const ORIGINAL_CONFIG: SiteConfig = {
-  primaryColor: '#a85c48', backgroundColor: '#f5ede7', fontFamily: 'Montserrat',
-  welcomeTitle: 'CHAUD DEVANT',
-  welcomeText: "Bienvenue dans l'espace sacré de notre famille.",
+  primaryColor: '#d97706',
+  backgroundColor: '#fefce8',
+  fontFamily: 'Montserrat',
+  welcomeTitle: 'BEEZY FAMILY',
+  welcomeText: 'Bienvenue dans la Ruche connectée de notre famille 🐝',
   welcomeImage: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=2070&auto=format&fit=crop',
-  navigationLabels: { home:'ACCUEIL', hub:'LE TABLEAU', xsite:'XSITE', cooking:'SEMAINIER', recipes:'RECETTES', calendar:'CALENDRIER', tasks:'TÂCHES', wallet:'PORTE-MONNAIE', frigo:'FRIGO', wishlist:'WISHLISTS' },
-  homeHtml: '', cookingHtml: '',
+  navigationLabels: {
+    home: 'LA RUCHE',
+    hub: 'LE TABLEAU',
+    xsite: 'XSITE',
+    cooking: 'SEMAINIER',
+    recipes: 'RECETTES',
+    calendar: 'AGENDA',
+    tasks: 'CORVÉES',
+    wallet: 'TIRELIRE',
+    frigo: 'FRIGO & CELLIER',
+    wishlist: 'WISHLISTS'
+  },
+  homeHtml: '',
+  cookingHtml: '',
   isLocked: false
-};
+} as any;
 
 // --- LOGIQUE INTELLIGENTE HUB ---
 const categorizeShoppingItem = (text: string) => {
@@ -2196,99 +2292,170 @@ const handleRecipePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
 // ==========================================
 // NAVIGATION
 // ==========================================
-const SideMenu = ({ config, isOpen, close, setView, logout }: any) => {
+// ==========================================
+// NAVIGATION BEEZY (CLAIRE & THÉMATIQUE RUCHE)
+// ==========================================
+const SideMenu = ({ config, isOpen, close, setView, logout, currentView, activeTheme, onSelectTheme }: any) => {
   const [openUniverse, setOpenUniverse] = useState<string|null>('cuisine');
 
   const universes = [
     {
       id: 'cuisine',
-      label: '🍳 CUISINE',
-      subtitle: 'Le Ventre',
+      label: '🍯 ALVÉOLE GOURMANDE',
+      subtitle: 'Courses, Frigo, Recettes & Repas',
       links: [
-        {id:'hub', label:'Le Tableau'},
-        {id:'frigo', label:'Le Frigo'},
-        {id:'recipes', label:'Les Recettes'},
-        {id:'cooking', label:'Le Semainier'},
+        { id: 'hub', label: '📋 Le Tableau (Courses & Mur)', badge: 'Hub' },
+        { id: 'frigo', label: '🧊 Le Frigo & Cellier', badge: 'Anti-gaspi' },
+        { id: 'recipes', label: '👩‍🍳 Les Recettes de la Ruche', badge: 'MiamSteps' },
+        { id: 'cooking', label: '🗓️ Le Semainier des Repas', badge: 'Menu' },
       ]
     },
     {
       id: 'intendance',
-      label: '📋 INTENDANCE',
-      subtitle: 'La Tête',
+      label: '🐝 VIE DE L’ESSAIM',
+      subtitle: 'Organisation, Missions & Budget',
       links: [
-        {id:'tasks', label:'Les Corvées'},
-        {id:'wallet', label:'La Tirelire'},
-        {id:'calendar', label:"L'Agenda"},
-        {id:'wishlist', label:'Les WishLists 🎁'},
+        { id: 'tasks', label: '🧹 Les Corvées du Samedi', badge: 'G / P / V' },
+        { id: 'wallet', label: '🪙 La Tirelire & Dettes', badge: 'Budget' },
+        { id: 'calendar', label: '📅 L’Agenda Familial', badge: 'Google Cal' },
+        { id: 'wishlist', label: '🎁 Les WishLists Cadeaux', badge: 'Envies' },
       ]
     },
     {
       id: 'systeme',
-      label: '⚙️ SYSTÈME',
-      subtitle: 'Les Rouages',
+      label: '👑 CELLULE ROYALE',
+      subtitle: 'Mini-sites & Administration',
       links: [
-        {id:'xsite', label:'XSite'},
-        {id:'edit', label:'Administration'},
+        { id: 'xsite', label: '🌐 XSite (Applications)', badge: 'Apps' },
+        { id: 'edit', label: '⚙️ Administration de la Ruche', badge: 'Admin' },
       ]
     },
   ];
 
   return (
-    <div className={`fixed inset-0 z-[60] ${isOpen?'':'pointer-events-none'}`}>
-      <div className={`absolute inset-0 bg-black/40 transition-opacity ${isOpen?'opacity-100':'opacity-0'}`} onClick={close}/>
-      <div className={`absolute right-0 top-0 h-full w-80 transition-transform ${isOpen?'translate-x-0':'translate-x-full'} overflow-y-auto`} style={{backgroundColor:config.backgroundColor}}>
-        {/* Header */}
-        <div className="p-8 pb-4 flex items-center justify-between border-b border-black/5">
-          <span className="font-cinzel font-black text-lg" style={{color:config.primaryColor}}>CHAUD.DEVANT</span>
-          <button onClick={()=>close(false)} className="text-gray-400 hover:text-black"><X size={20}/></button>
-        </div>
-
-        {/* Accueil */}
-        <div className="px-6 pt-4">
-          <button onClick={()=>{setView('home');close(false);}} className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-black/5 transition-colors font-bold text-sm">
-            <Home size={16} style={{color:config.primaryColor}}/> Accueil
-          </button>
-        </div>
-
-        {/* 3 Univers */}
-        <div className="px-4 py-2 space-y-1">
-          {universes.map(u=>(
-            <div key={u.id}>
-              {/* En-tête univers */}
-              <button
-                onClick={()=>setOpenUniverse(openUniverse===u.id?null:u.id)}
-                className="flex items-center justify-between w-full px-4 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:bg-black/5"
-                style={{color: openUniverse===u.id ? config.primaryColor : '#9ca3af'}}
+    <div className={`fixed inset-0 z-[60] ${isOpen ? '' : 'pointer-events-none'}`}>
+      <div
+        className={`absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+        onClick={() => close(false)}
+      />
+      <div
+        className={`absolute right-0 top-0 h-full w-80 sm:w-96 transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto shadow-2xl border-l border-amber-500/20 flex flex-col justify-between`}
+        style={{ backgroundColor: config.backgroundColor }}
+      >
+        <div>
+          {/* Header Ruche */}
+          <div className="p-6 flex items-center justify-between border-b border-black/10">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl shadow-md"
+                style={{ backgroundColor: config.primaryColor }}
               >
-                <div className="text-left">
-                  <div>{u.label}</div>
-                  <div className="text-[9px] font-bold opacity-50 normal-case tracking-normal mt-0.5">{u.subtitle}</div>
-                </div>
-                <ChevronRight size={14} className={`transition-transform ${openUniverse===u.id?'rotate-90':''}`}/>
-              </button>
-
-              {/* Liens du groupe */}
-              {openUniverse===u.id&&(
-                <div className="ml-4 pl-3 border-l-2 space-y-0.5 mb-2 animate-in slide-in-from-top-2" style={{borderColor:config.primaryColor+'40'}}>
-                  {u.links.map(link=>(
-                    <button
-                      key={link.id}
-                      onClick={()=>{setView(link.id);close(false);}}
-                      className="block w-full text-left px-4 py-3 rounded-xl font-bold text-sm hover:bg-black/5 transition-colors text-gray-700 hover:text-black"
-                    >
-                      {link.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+                🐝
+              </div>
+              <div>
+                <span className="font-cinzel font-black text-lg block leading-none" style={{ color: config.primaryColor }}>
+                  BEEZY HUB
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">
+                  Menu de la Ruche
+                </span>
+              </div>
             </div>
-          ))}
+            <button onClick={() => close(false)} className="p-2 rounded-xl hover:bg-black/5 text-gray-500 hover:text-black">
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Sélecteur de Thème Rapide dans le Menu */}
+          {onSelectTheme && (
+            <div className="px-6 pt-4 pb-2">
+              <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-2">
+                🎨 Ambiance de la Ruche
+              </p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {Object.values(BEEZY_THEMES).map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => onSelectTheme(t.id)}
+                    className={`px-2 py-1.5 rounded-xl text-[10px] font-bold border flex items-center gap-1 transition-all ${
+                      activeTheme === t.id ? 'ring-2 ring-amber-500 scale-105 font-black bg-white shadow-xs' : 'opacity-75 hover:opacity-100 bg-white/50'
+                    }`}
+                  >
+                    <span>{t.emoji}</span>
+                    <span className="truncate">{t.name.split(' ')[0]}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Bouton Accueil Ruche */}
+          <div className="px-6 pt-3">
+            <button
+              onClick={() => { setView('home'); close(false); }}
+              className={`flex items-center justify-between w-full p-3.5 rounded-2xl transition-all font-black text-sm ${
+                currentView === 'home' ? 'text-white shadow-md' : 'hover:bg-black/5'
+              }`}
+              style={currentView === 'home' ? { backgroundColor: config.primaryColor } : {}}
+            >
+              <span className="flex items-center gap-3">
+                <Home size={18} style={{ color: currentView === 'home' ? '#fff' : config.primaryColor }} />
+                🏠 Accueil de la Ruche
+              </span>
+              <ChevronRight size={15} />
+            </button>
+          </div>
+
+          {/* Les 3 Univers */}
+          <div className="px-4 py-3 space-y-2">
+            {universes.map((u) => (
+              <div key={u.id} className="rounded-2xl bg-white/40 border border-black/5 overflow-hidden">
+                <button
+                  onClick={() => setOpenUniverse(openUniverse === u.id ? null : u.id)}
+                  className="flex items-center justify-between w-full px-4 py-3.5 font-black text-xs uppercase tracking-wider transition-all hover:bg-black/5"
+                  style={{ color: openUniverse === u.id ? config.primaryColor : '#57534e' }}
+                >
+                  <div className="text-left">
+                    <div>{u.label}</div>
+                    <div className="text-[10px] font-semibold opacity-60 normal-case tracking-normal mt-0.5">{u.subtitle}</div>
+                  </div>
+                  <ChevronRight size={15} className={`transition-transform duration-200 ${openUniverse === u.id ? 'rotate-90' : ''}`} />
+                </button>
+
+                {openUniverse === u.id && (
+                  <div className="px-2 pb-2 space-y-1 animate-in slide-in-from-top-2">
+                    {u.links.map((link) => {
+                      const active = currentView === link.id;
+                      return (
+                        <button
+                          key={link.id}
+                          onClick={() => { setView(link.id); close(false); }}
+                          className={`flex items-center justify-between w-full text-left px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all ${
+                            active ? 'text-white shadow-xs' : 'text-stone-700 hover:bg-black/5'
+                          }`}
+                          style={active ? { backgroundColor: config.primaryColor } : {}}
+                        >
+                          <span>{link.label}</span>
+                          <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase ${active ? 'bg-white/25 text-white' : 'bg-black/5 text-stone-500'}`}>
+                            {link.badge}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Déconnexion */}
-        <div className="px-6 mt-4 border-t border-black/5 pt-4">
-          <button onClick={logout} className="flex items-center gap-3 w-full p-3 rounded-xl text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors font-bold text-sm">
-            <LogIn size={16}/> Déconnexion
+        <div className="p-6 border-t border-black/10">
+          <button
+            onClick={logout}
+            className="flex items-center justify-center gap-2 w-full p-3.5 rounded-2xl text-red-600 bg-red-50 hover:bg-red-100 transition-colors font-black text-xs uppercase tracking-wider"
+          >
+            <LogIn size={16} /> Quitter la Ruche (Déconnexion)
           </button>
         </div>
       </div>
@@ -2297,22 +2464,64 @@ const SideMenu = ({ config, isOpen, close, setView, logout }: any) => {
 };
 
 const BottomNav = ({ config, view, setView, hidden }: any) => (
-  <div className={`md:hidden fixed bottom-0 w-full h-24 flex justify-around items-center rounded-t-[2.5rem] z-40 px-4 pb-4 transition-transform duration-300 bottom-nav-glass ${hidden ? 'translate-y-full' : 'translate-y-0'}`} style={{color:config.primaryColor}}>
+  <div
+    className={`md:hidden fixed bottom-0 w-full h-20 flex justify-around items-center rounded-t-[2rem] z-40 px-2 pb-2 transition-transform duration-300 bottom-nav-glass border-t border-amber-500/20 ${
+      hidden ? 'translate-y-full' : 'translate-y-0'
+    }`}
+    style={{ color: config.primaryColor }}
+  >
     {[
-      {id:'home',i:<Home size={22}/>},
-      {id:'hub',i:<LayoutDashboard size={22}/>},
-      {id:'tasks',i:<CheckSquare size={22}/>},
-      {id:'recipes',i:<ChefHat size={22}/>},
-      {id:'cooking',i:<CalIcon size={22}/>}
-    ].map(b=><button key={b.id} onClick={()=>setView(b.id)} className={`p-2 ${view===b.id?'opacity-100 -translate-y-2 bg-white/20 rounded-xl':''}`}>{b.i}</button>)}
+      { id: 'home', label: 'Ruche', i: <Home size={20} /> },
+      { id: 'hub', label: 'Tableau', i: <LayoutDashboard size={20} /> },
+      { id: 'frigo', label: 'Frigo', i: <Refrigerator size={20} /> },
+      { id: 'tasks', label: 'Corvées', i: <CheckSquare size={20} /> },
+      { id: 'recipes', label: 'Recettes', i: <ChefHat size={20} /> },
+      { id: 'cooking', label: 'Menu', i: <CalIcon size={20} /> }
+    ].map((b) => (
+      <button
+        key={b.id}
+        onClick={() => setView(b.id)}
+        className={`flex flex-col items-center justify-center py-1.5 px-2.5 rounded-2xl transition-all ${
+          view === b.id ? 'opacity-100 -translate-y-1 bg-amber-500/15 font-black shadow-xs' : 'opacity-60 hover:opacity-100'
+        }`}
+      >
+        {b.i}
+        <span className="text-[9px] font-extrabold mt-0.5 tracking-tight">{b.label}</span>
+      </button>
+    ))}
   </div>
 );
 
-const HomeCard = ({ icon, title, label, onClick, color }: any) => (
-  <div onClick={onClick} className="card-glass p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] cursor-pointer hover:scale-105 transition-transform shadow-lg border border-white/50 group">
-    <div style={{color}} className="mb-6 group-hover:scale-110 transition-transform">{icon}</div>
-    <h3 className="text-xl md:text-3xl font-bold tracking-tight mb-2">{title}</h3>
-    <p className="text-[10px] font-bold tracking-widest opacity-50 uppercase flex items-center gap-2">{label}<ChevronRight size={14}/></p>
+const HomeCard = ({ icon, title, label, badge, onClick, color }: any) => (
+  <div
+    onClick={onClick}
+    className="card-glass p-6 md:p-8 rounded-[2rem] cursor-pointer hover:scale-[1.03] transition-all shadow-lg border border-amber-500/25 group relative overflow-hidden"
+  >
+    <div
+      className="absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 group-hover:scale-125 transition-transform"
+      style={{ backgroundColor: color }}
+    />
+    <div className="flex items-center justify-between mb-5">
+      <div
+        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform"
+        style={{ backgroundColor: `${color}18`, color }}
+      >
+        {icon}
+      </div>
+      {badge && (
+        <span
+          className="text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full"
+          style={{ backgroundColor: `${color}20`, color }}
+        >
+          {badge}
+        </span>
+      )}
+    </div>
+    <h3 className="text-xl md:text-2xl font-black tracking-tight mb-1">{title}</h3>
+    <p className="text-xs font-bold opacity-60 flex items-center justify-between">
+      <span>{label}</span>
+      <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" style={{ color }} />
+    </p>
   </div>
 );
 
@@ -5082,7 +5291,7 @@ const App: React.FC = () => {
   const [choreStatus, setChoreStatus] = useState<Record<string,any>>({});
   const [favorites, setFavorites] = useState<string[]>([]);
   const [siteUsers, setSiteUsers] = useState<any[]>([]);
-const [siteUsersLoading, setSiteUsersLoading] = useState(true);
+  const [siteUsersLoading, setSiteUsersLoading] = useState(true);
   const [usersMapping, setUsersMapping] = useState<Record<string,string>>({});
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -5097,47 +5306,78 @@ const [siteUsersLoading, setSiteUsersLoading] = useState(true);
   const [recipeFilter, setRecipeFilter] = useState('');
   const [recipeCategory, setRecipeCategory] = useState('all');
   const [currentView, setCurrentView] = useState<string>('home');
-  const [pendingQuizId, setPendingQuizId] = useState<string|null>(null); // quiz à afficher post-login
+  const [pendingQuizId, setPendingQuizId] = useState<string|null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
   const [chatHistory, setChatHistory] = useState<{role:string,text:string}[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [showFreemiumModal, setShowFreemiumModal] = useState(false);
   const [wishlistModalOpen, setWishlistModalOpen] = useState(false);
-  const [xsiteData, setXsiteData] = useState<Record<string,string>>({}); // données localStorage xsite
+  const [xsiteData, setXsiteData] = useState<Record<string,string>>({});
   const xsiteIframeRef = useRef<HTMLIFrameElement>(null);
   const [tokenBalance, setTokenBalance] = useState<number|null>(null);
-  const [showTokenShop, setShowTokenShop] = useState(false);   // modal achat tokens
-  const [adminTokenUser, setAdminTokenUser] = useState<{id:string,name:string}|null>(null); // modal tokens admin
+  const [showTokenShop, setShowTokenShop] = useState(false);
+  const [adminTokenUser, setAdminTokenUser] = useState<{id:string,name:string}|null>(null);
   const [showCommPanel, setShowCommPanel] = useState(false);
   const [githubConfig, setGithubConfig] = useState<{owner:string,repo:string,branch:string}|null>(null);
+
+  // ── NOUVEAU : THÈME BEEZY PERSONNALISÉ & BZZZ DU JOUR ──
+  const [activeThemeKey, setActiveThemeKey] = useState<string>(() => {
+    return localStorage.getItem('beezy_theme_key') || 'miel';
+  });
+  const [showThemePicker, setShowThemePicker] = useState(false);
+  const [bzzzMessage, setBzzzMessage] = useState<string>(() => {
+    return localStorage.getItem('beezy_bzzz_msg') || 'Bienvenue dans la Ruche familiale ! Pensez à vérifier vos corvées du samedi et la liste de courses 🐝🍯';
+  });
+
+  const activeTheme = BEEZY_THEMES[activeThemeKey] || BEEZY_THEMES.miel;
+
+  const applyBeezyTheme = async (themeId: string) => {
+    const preset = BEEZY_THEMES[themeId];
+    if (!preset) return;
+    setActiveThemeKey(themeId);
+    localStorage.setItem('beezy_theme_key', themeId);
+    // Met à jour les couleurs actives immédiatement
+    setConfig(prev => ({
+      ...prev,
+      primaryColor: preset.primaryColor,
+      backgroundColor: preset.backgroundColor,
+    }));
+    if (user?.email) {
+      try {
+        await setDoc(doc(db, 'user_prefs', user.email), { themeId }, { merge: true });
+      } catch {}
+    }
+  };
+
+  // ── COUPE-CIRCUIT ANTI-BLOCAGE AU CHARGEMENT (SAFETY TIMEOUT) ──
+  useEffect(() => {
+    const safetyTimer = setTimeout(() => {
+      setIsInitializing(false);
+      setSiteUsersLoading(false);
+    }, 2500);
+    return () => clearTimeout(safetyTimer);
+  }, []);
 
   // ── XSite : intercepter localStorage de l'iframe via postMessage ──
   useEffect(() => {
     if (!user?.email || !selectedXSite) return;
     const siteKey = `${user.email}_${selectedXSite.id}`;
-    // Charger les données sauvegardées depuis Firestore
     const loadData = async () => {
       const snap = await getDoc(doc(db, 'xsite_data', siteKey));
       const saved = snap.exists() ? (snap.data() as Record<string,string>) : {};
       setXsiteData(saved);
-      // Les données sont envoyées via onLoad de l'iframe
     };
     loadData();
-    // Écouter les messages de l'iframe
-    // Buffer local pour debouncer les écritures Firestore
     let pendingData: Record<string,string> | null = null;
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
     const flushToFirestore = async (data: Record<string,string>) => {
-      // merge:true pour ne pas écraser les clés non modifiées
       await setDoc(doc(db, 'xsite_data', siteKey), data, { merge: true });
     };
 
     const onMsg = async (e: MessageEvent) => {
       if (!e.data?.type) return;
-
-      // L'iframe signale qu'elle est prête : envoyer les données initiales
       if (e.data.type === 'XSITE_READY') {
         const snap = await getDoc(doc(db, 'xsite_data', siteKey));
         const saved = snap.exists() ? (snap.data() as Record<string,string>) : {};
@@ -5146,14 +5386,10 @@ const [siteUsersLoading, setSiteUsersLoading] = useState(true);
         xsiteIframeRef.current?.contentWindow?.postMessage({ type: 'XSITE_INIT', data: saved }, '*');
         return;
       }
-
-      // L'iframe sauvegarde une valeur
       if (e.data.type === 'XSITE_SET') {
         const { key, value } = e.data;
-        // Mise à jour locale immédiate
         pendingData = { ...(pendingData || {}), [key]: value };
         setXsiteData({ ...pendingData });
-        // Debounce : écrire Firestore 400ms après le dernier setItem
         if (debounceTimer) clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           if (pendingData) flushToFirestore(pendingData);
@@ -5175,15 +5411,13 @@ const [siteUsersLoading, setSiteUsersLoading] = useState(true);
   };
 
   // ── Consommer des tokens IA ──
-  // Retourne true si OK, false si solde insuffisant
   const consumeTokens = async (cost: number): Promise<boolean> => {
     if(!user?.email) return false;
     const ref = doc(db,'user_tokens',user.email);
     const snap = await getDoc(ref);
     const now = new Date();
-    const currentMonth = now.toISOString().slice(0,7); // "2026-03"
+    const currentMonth = now.toISOString().slice(0,7);
     let data = snap.exists() ? snap.data() : null;
-    // Reset mensuel si nouveau mois
     if(!data || data.resetMonth !== currentMonth) {
       const userDoc = siteUsers.find(u => u.id === user?.email);
       const isPro = userDoc?.plan === 'pro' || userDoc?.plan === 'premium';
@@ -5191,7 +5425,7 @@ const [siteUsersLoading, setSiteUsersLoading] = useState(true);
       data = { balance: data ? resetBal : TOKEN_WELCOME, resetMonth: currentMonth };
       await setDoc(ref, data);
     }
-    if(data.balance < cost) return false; // Solde insuffisant
+    if(data.balance < cost) return false;
     await updateDoc(ref,{ balance: data.balance - cost });
     setTokenBalance(data.balance - cost);
     return true;
@@ -5208,51 +5442,59 @@ const [siteUsersLoading, setSiteUsersLoading] = useState(true);
     alert('✅ Demande envoyée ! L\'administrateur vous contactera très bientôt.');
   };
 
-  // AUTH
+  // AUTH (CORRIGÉ : débloque siteUsersLoading si non connecté)
   useEffect(()=>{
     const unsub=onAuthStateChanged(auth,async u=>{
-      setUser(u);setIsInitializing(false);
+      setUser(u);
+      setIsInitializing(false);
+      if(!u) {
+        // CORRECTIF CRITIQUE : si aucun utilisateur n'est connecté, on ne bloque pas sur siteUsersLoading !
+        setSiteUsersLoading(false);
+        return;
+      }
       if(u&&u.email){
-      getDoc(doc(db,'site_config','github')).then(snap=>{
-  if(snap.exists()) setGithubConfig(snap.data() as any);
-}).catch(()=>{});
+        getDoc(doc(db,'site_config','github')).then(snap=>{
+          if(snap.exists()) setGithubConfig(snap.data() as any);
+        }).catch(()=>{});
         try{
           await setDoc(doc(db,'site_users',u.email),{lastLogin:new Date().toISOString(),email:u.email},{merge:true});
           const prefsDoc=await getDoc(doc(db,'user_prefs',u.email));
           if(prefsDoc.exists()){
-  setFavorites(prefsDoc.data().favorites||[]);
-}
-// Traiter les événements gcal en attente pour cet utilisateur
-const pendingSnap = await getDocs(
-  query(collection(db,'gcal_pending_events'),
-    where('targetEmail','==', u.email),
-    where('processed','==', false)
-  )
-);
-if(!pendingSnap.empty) {
-  const token = getGcalToken();
-  if(token) {
-    for(const pendingDoc of pendingSnap.docs) {
-      const ev = pendingDoc.data();
-      try {
-        await pousserVersGoogleCalendar(ev.titre, ev.dateIso, ev.description, ev.allDay);
-        await updateDoc(doc(db,'gcal_pending_events', pendingDoc.id), { processed: true });
-      } catch { /* silencieux */ }
-    }
-  }
-}
-          // Vérifier si un quiz est en attente et n'a pas encore été fait/passé
+            const pData = prefsDoc.data();
+            setFavorites(pData.favorites||[]);
+            if(pData.themeId && BEEZY_THEMES[pData.themeId]) {
+              setActiveThemeKey(pData.themeId);
+              localStorage.setItem('beezy_theme_key', pData.themeId);
+            }
+          }
+          // Traiter les événements gcal en attente pour cet utilisateur
+          const pendingSnap = await getDocs(
+            query(collection(db,'gcal_pending_events'),
+              where('targetEmail','==', u.email),
+              where('processed','==', false)
+            )
+          );
+          if(!pendingSnap.empty) {
+            const token = getGcalToken();
+            if(token) {
+              for(const pendingDoc of pendingSnap.docs) {
+                const ev = pendingDoc.data();
+                try {
+                  await pousserVersGoogleCalendar(ev.titre, ev.dateIso, ev.description, ev.allDay);
+                  await updateDoc(doc(db,'gcal_pending_events', pendingDoc.id), { processed: true });
+                } catch { /* silencieux */ }
+              }
+            }
+          }
+          // Vérifier si un quiz est en attente
           const prefs = prefsDoc.exists() ? prefsDoc.data() : {};
           const quizSnap = await getDocs(collection(db,'questionnaires'));
           quizSnap.docs.forEach(qd=>{
             const qid = qd.id;
             const alreadyDone      = !!prefs[`quiz_done_${qid}`];
             const alreadySkipped   = !!prefs[`quiz_skipped_${qid}`];
-            // quiz_postponed → on l'affiche quand même (c'est le but du report)
-            // et on efface le flag postponed pour cette session
             if(!alreadyDone && !alreadySkipped){
               setPendingQuizId(qid);
-              // Effacer le flag postponed maintenant qu'on l'affiche
               if(prefs[`quiz_postponed_${qid}`]) {
                 setDoc(doc(db,'user_prefs',u.email!),
                   {[`quiz_postponed_${qid}`]: false},
@@ -5270,37 +5512,61 @@ if(!pendingSnap.empty) {
   const isAuthorized = user&&user.email&&(siteUsers.find(u=>u.id===user.email)||user.email===ADMIN_EMAIL);
   const myLetter = user&&user.email?(usersMapping[user.email]||user.email.charAt(0).toUpperCase()):null;
 
-  // CHARGEMENT DONNÉES
+  // CHARGEMENT DONNÉES (CORRIGÉ : gestion d'erreur non-bloquante sur site_users)
   useEffect(()=>{
-    if(!user) return;
-    const ignoreError=(err:any)=>{console.log("Info:",err.code);};
-    const unsubC=onSnapshot(doc(db,'site_config','main'),d=>{if(d.exists())setConfig(d.data() as SiteConfig);},ignoreError);
+    if(!user) {
+      setSiteUsersLoading(false);
+      return;
+    }
+    const ignoreError=(err:any)=>{
+      console.log("Info:",err.code);
+      setSiteUsersLoading(false);
+    };
+    const unsubC=onSnapshot(doc(db,'site_config','main'),d=>{
+      if(d.exists()){
+        const remoteConfig = d.data() as SiteConfig;
+        const savedTheme = localStorage.getItem('beezy_theme_key');
+        const preset = savedTheme ? BEEZY_THEMES[savedTheme] : null;
+        setConfig({
+          ...remoteConfig,
+          primaryColor: preset ? preset.primaryColor : (remoteConfig.primaryColor || '#d97706'),
+          backgroundColor: preset ? preset.backgroundColor : (remoteConfig.backgroundColor || '#fefce8'),
+        });
+        if((remoteConfig as any).bzzzMessage) {
+          setBzzzMessage((remoteConfig as any).bzzzMessage);
+        }
+      }
+    },ignoreError);
     const unsubM=onSnapshot(doc(db,'site_config','maintenance'),d=>{if(d.exists())setLockedPagesMap(d.data()?.lockedPages||{});else setLockedPagesMap({});},ignoreError);
     const unsubX=onSnapshot(query(collection(db,'xsite_pages'),orderBy('timestamp','desc')),s=>setXsitePages(s.docs.map(d=>({...d.data(),id:d.id}))),ignoreError);
     const unsubR=onSnapshot(collection(db,'family_recipes'),s=>setRecipes(s.docs.map(d=>({...d.data(),id:d.id} as Recipe))),ignoreError);
     const unsubE=onSnapshot(collection(db,'family_events'),s=>{const raw=s.docs.map(d=>({...d.data(),id:d.id} as FamilyEvent));raw.sort((a,b)=>a.date.localeCompare(b.date));setEvents(raw);},ignoreError);
     const unsubV=onSnapshot(query(collection(db,'site_versions'),orderBy('date','desc')),s=>setVersions(s.docs.map(d=>({...d.data(),id:d.id} as SiteVersion))),ignoreError);
     const unsubT=onSnapshot(collection(db,'chores_status'),s=>{const status:Record<string,any>={};s.docs.forEach(d=>{status[d.id]=d.data();});setChoreStatus(status);},ignoreError);
-    const unsubU=onSnapshot(collection(db,'site_users'),s=>{const users=s.docs.map(d=>({id:d.id,...d.data()}));setSiteUsers(users);setSiteUsersLoading(false);const newMap:Record<string,string>={};users.forEach((u:any)=>{if(u.letter)newMap[u.id]=u.letter;});setUsersMapping(newMap);},ignoreError);
-    // Écouter le solde de tokens en temps réel
+    const unsubU=onSnapshot(collection(db,'site_users'),s=>{
+      const users=s.docs.map(d=>({id:d.id,...d.data()}));
+      setSiteUsers(users);
+      setSiteUsersLoading(false);
+      const newMap:Record<string,string>={};
+      users.forEach((u:any)=>{if(u.letter)newMap[u.id]=u.letter;});
+      setUsersMapping(newMap);
+    },ignoreError);
     const unsubTokens = onSnapshot(doc(db,'user_tokens',user.email!), async snap => {
       const now = new Date();
       const currentMonth = now.toISOString().slice(0,7);
       if(snap.exists()) {
         const data = snap.data();
         if(data.resetMonth !== currentMonth) {
-          // Nouveau mois → reset
           const isPro = siteUsers.find(u=>u.id===user.email)?.plan === 'pro' || siteUsers.find(u=>u.id===user.email)?.plan === 'premium';
           await setDoc(doc(db,'user_tokens',user.email!),{ balance: isPro ? TOKEN_PRO_RESET : TOKEN_FREE_RESET, resetMonth: currentMonth });
         } else {
           setTokenBalance(data.balance ?? TOKEN_WELCOME);
         }
       } else {
-        // Première connexion → tokens de bienvenue
         await setDoc(doc(db,'user_tokens',user.email!),{ balance: TOKEN_WELCOME, resetMonth: currentMonth });
         setTokenBalance(TOKEN_WELCOME);
       }
-    });
+    }, ignoreError);
     const unsubN=onSnapshot(query(collection(db,'notifications'),orderBy('createdAt','desc')),s=>{
       const raw=s.docs.map(d=>({id:d.id,...d.data()} as AppNotification));
       const visible=raw.filter(n=>{
@@ -5320,49 +5586,46 @@ if(!pendingSnap.empty) {
     return()=>{unsubC();unsubM();unsubX();unsubR();unsubE();unsubV();unsubT();unsubU();unsubN();unsubTokens();};
   },[user]);
 
-  // DEEP LINKING — stocke les paramètres URL au mount, résout quand xsitePages est chargé
-const [pendingXSiteId, setPendingXSiteId] = useState<string|null>(null);
-const [pendingAnchor, setPendingAnchor] = useState<string|null>(null);
+  // DEEP LINKING
+  const [pendingXSiteId, setPendingXSiteId] = useState<string|null>(null);
+  const [pendingAnchor, setPendingAnchor] = useState<string|null>(null);
 
-// Capture des paramètres URL au montage (une seule fois)
-useEffect(()=>{
-  const params=new URLSearchParams(window.location.search);
-  const targetView=params.get('view');
-  if(targetView){
-    setCurrentView(targetView);
-    if(targetView==='xsite'){
-      const siteId=params.get('id');
-      if(siteId) setPendingXSiteId(siteId); // stocke pour résolution ultérieure
-    }
-    const anchorId=params.get('anchor');
-    if(anchorId) setPendingAnchor(anchorId);
-    window.history.replaceState({},document.title,window.location.pathname);
-  }
-},[]); // dépend uniquement du mount
-
-// Résolution du XSite une fois xsitePages disponible
-useEffect(()=>{
-  if(pendingXSiteId && xsitePages.length>0){
-    const found=xsitePages.find(p=>p.id===pendingXSiteId);
-    if(found){ setSelectedXSite(found); setPendingXSiteId(null); }
-  }
-},[xsitePages, pendingXSiteId]);
-
-// Résolution de l'ancre après navigation
-useEffect(()=>{
-  if(pendingAnchor){
-    const timer=setTimeout(()=>{
-      const el=document.getElementById(pendingAnchor);
-      if(el){
-        el.scrollIntoView({behavior:'smooth',block:'start'});
-        el.classList.add('ring-4','ring-offset-2','ring-orange-400','transition-all','duration-1000');
-        setTimeout(()=>el.classList.remove('ring-4','ring-offset-2','ring-orange-400'),2000);
+  useEffect(()=>{
+    const params=new URLSearchParams(window.location.search);
+    const targetView=params.get('view');
+    if(targetView){
+      setCurrentView(targetView);
+      if(targetView==='xsite'){
+        const siteId=params.get('id');
+        if(siteId) setPendingXSiteId(siteId);
       }
-      setPendingAnchor(null);
-    },800);
-    return ()=>clearTimeout(timer);
-  }
-},[pendingAnchor, currentView]);
+      const anchorId=params.get('anchor');
+      if(anchorId) setPendingAnchor(anchorId);
+      window.history.replaceState({},document.title,window.location.pathname);
+    }
+  },[]);
+
+  useEffect(()=>{
+    if(pendingXSiteId && xsitePages.length>0){
+      const found=xsitePages.find(p=>p.id===pendingXSiteId);
+      if(found){ setSelectedXSite(found); setPendingXSiteId(null); }
+    }
+  },[xsitePages, pendingXSiteId]);
+
+  useEffect(()=>{
+    if(pendingAnchor){
+      const timer=setTimeout(()=>{
+        const el=document.getElementById(pendingAnchor);
+        if(el){
+          el.scrollIntoView({behavior:'smooth',block:'start'});
+          el.classList.add('ring-4','ring-offset-2','ring-amber-400','transition-all','duration-1000');
+          setTimeout(()=>el.classList.remove('ring-4','ring-offset-2','ring-amber-400'),2000);
+        }
+        setPendingAnchor(null);
+      },800);
+      return ()=>clearTimeout(timer);
+    }
+  },[pendingAnchor, currentView]);
 
   // ACTIONS
   const handleLogin=async()=>{try{await signInWithPopup(auth,googleProvider);}catch(e){alert("Erreur Auth");}};
@@ -5373,9 +5636,7 @@ useEffect(()=>{
       await setDoc(doc(db,'site_config','main'),c);
       setConfig(c);
       if(saveHistory){
-        // On sauvegarde une copie légère sans les gros champs base64/HTML
         const {welcomeImage, cookingHtml, homeHtml, ...lightConfig} = c as any;
-        // On garde quand même welcomeImage s'il commence par https:// (URL externe légère)
         const versionConfig = {
           ...lightConfig,
           welcomeImage: (welcomeImage && !welcomeImage.startsWith('data:')) ? welcomeImage : '',
@@ -5402,49 +5663,90 @@ useEffect(()=>{
   const markNotifRead=async(notifId:string)=>{if(!user?.email)return;await setDoc(doc(db,'notifications',notifId),{readBy:{[user.email]:new Date().toISOString()}},{merge:true});};
   const handleNotificationClick=(n:AppNotification)=>{markNotifRead(n.id);if(n.linkView){setCurrentView(n.linkView);if(n.linkView==='xsite'&&n.linkId){const site=xsitePages.find(p=>p.id===n.linkId);if(site)setSelectedXSite(site);}else if(n.linkId){setTimeout(()=>{const el=document.getElementById(n.linkId!);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},500);}}setIsNotifOpen(false);};
 
-  // Helper : vérifie si une page est verrouillée pour les non-admins
   const isPageLocked = (viewKey: string): boolean => {
-    if(user?.email === ADMIN_EMAIL) return false; // L'admin voit toujours tout
+    if(user?.email === ADMIN_EMAIL) return false;
     return !!lockedPagesMap[viewKey];
   };
 
-  // --- ÉCRANS SPÉCIAUX ---
-  // Support quiz : détecter ?quiz=id dans l'URL et stocker pour post-login
+  const updateBzzzMessage = async () => {
+    const nextMsg = prompt('🐝 Nouveau message "Bzzz du Jour" pour toute la famille :', bzzzMessage);
+    if (nextMsg && nextMsg.trim()) {
+      setBzzzMessage(nextMsg.trim());
+      localStorage.setItem('beezy_bzzz_msg', nextMsg.trim());
+      try {
+        await setDoc(doc(db, 'site_config', 'main'), { bzzzMessage: nextMsg.trim() }, { merge: true });
+      } catch {}
+    }
+  };
+
+  // Support quiz ?quiz=id
   React.useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     const id = p.get('quiz');
     if(id) {
       setPendingQuizId(id);
-      // Nettoyer l'URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
-  if(isInitializing || siteUsersLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f9f9f9]">
-      <div className="flex flex-col items-center" style={{position:'relative'}}>
-        <style>{`
-          @keyframes cd-bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-25px) scale(1.05)}}
-          @keyframes cd-shadow{0%,100%{transform:scale(1);opacity:.2}50%{transform:scale(.5);opacity:.05}}
-          @keyframes cd-pulse{0%,100%{opacity:1}50%{opacity:.5}}
-          .cd-logo{width:120px;height:auto;animation:cd-bounce 2s infinite ease-in-out;filter:drop-shadow(0 4px 6px rgba(0,0,0,.05))}
-          .cd-shadow{width:70px;height:10px;background:rgba(0,0,0,.15);border-radius:50%;margin-top:16px;animation:cd-shadow 2s infinite ease-in-out}
-          .cd-text{margin-top:24px;color:#a85c48;font-weight:700;font-size:1rem;letter-spacing:3px;text-transform:uppercase;animation:cd-pulse 2s infinite ease-in-out;font-family:'Inter',sans-serif}
-        `}</style>
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E" alt="Logo" className="cd-logo"/>
-        <div className="cd-shadow"/>
-        <div className="cd-text">En cuisine…</div>
+  // --- ORDRE LOGIQUE CORRIGÉ : 1. Initialisation Auth -> 2. Écran Login si !user -> 3. Chargement Membres ---
+  if(isInitializing) return (
+    <div className="min-h-screen flex items-center justify-center bg-[#fefce8]">
+      <div className="flex flex-col items-center text-center p-6">
+        <div className="text-7xl animate-bounce mb-4">🐝</div>
+        <div className="text-amber-700 font-black tracking-widest uppercase text-sm animate-pulse">
+          Ouverture de la Ruche Beezy…
+        </div>
+        <button
+          onClick={() => { setIsInitializing(false); setSiteUsersLoading(false); }}
+          className="mt-6 px-4 py-2 rounded-full bg-amber-200/70 hover:bg-amber-300 text-amber-900 text-xs font-bold transition-all"
+        >
+          Forcer l'accès immédiat →
+        </button>
       </div>
     </div>
   );
 
   if(!user) return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center p-6 bg-[#f5ede7]">
-      
-      <div className="z-10 text-center space-y-8 animate-in fade-in zoom-in duration-700">
-        <div className="mx-auto w-24 h-24 rounded-[2.5rem] flex items-center justify-center shadow-xl bg-[#a85c48]"><Sparkles className="text-white" size={48}/></div>
-        <h1 className="text-4xl font-cinzel font-black tracking-widest text-[#a85c48]">CHAUD DEVANT</h1>
-        <button onClick={handleLogin} className="bg-white text-black font-black py-4 px-8 rounded-2xl shadow-xl flex items-center gap-3 hover:scale-105 transition-transform"><LogIn size={24}/>CONNEXION GOOGLE</button>
+    <div className="fixed inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-100">
+      <div className="z-10 text-center space-y-6 max-w-md w-full bg-white/80 backdrop-blur-xl p-10 rounded-[3rem] shadow-2xl border border-amber-300/50 animate-in fade-in zoom-in duration-500">
+        <div className="mx-auto w-24 h-24 rounded-[2rem] flex items-center justify-center shadow-xl bg-amber-500 text-5xl">
+          🐝
+        </div>
+        <div>
+          <span className="text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+            Hub Familial Connecté
+          </span>
+          <h1 className="text-4xl font-cinzel font-black tracking-wider text-amber-900 mt-3">
+            BEEZY FAMILY
+          </h1>
+          <p className="text-xs text-stone-500 mt-2">
+            Courses, Frigo intelligent, Recettes, Semainier, Corvées & Tirelire dans une seule Ruche.
+          </p>
+        </div>
+        <button
+          onClick={handleLogin}
+          className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black py-4 px-8 rounded-2xl shadow-lg shadow-amber-500/30 flex items-center justify-center gap-3 hover:scale-[1.02] transition-all"
+        >
+          <LogIn size={22}/> ENTRER DANS LA RUCHE (GOOGLE)
+        </button>
+      </div>
+    </div>
+  );
+
+  if(siteUsersLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-[#fefce8]">
+      <div className="flex flex-col items-center text-center p-6">
+        <div className="text-6xl animate-bounce mb-4">🍯</div>
+        <div className="text-amber-800 font-black tracking-widest uppercase text-xs">
+          Synchronisation des alvéoles…
+        </div>
+        <button
+          onClick={() => setSiteUsersLoading(false)}
+          className="mt-6 px-4 py-2 rounded-full bg-amber-200 hover:bg-amber-300 text-amber-900 text-xs font-bold"
+        >
+          Continuer sans attendre →
+        </button>
       </div>
     </div>
   );
@@ -5452,36 +5754,35 @@ useEffect(()=>{
   if(!isAuthorized && !siteUsersLoading) return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-red-50 text-center space-y-8">
       <ShieldAlert className="text-red-500 w-20 h-20"/>
-      <h2 className="text-3xl font-bold tracking-tight text-red-800">ACCÈS RESTREINT</h2>
-      <p>Contactez Gabriel pour valider votre compte.</p>
+      <h2 className="text-3xl font-bold tracking-tight text-red-800">ACCÈS RESTREINT À L'ESSAIM</h2>
+      <p className="text-stone-600">Contactez Gabriel pour valider votre accès à la Ruche Beezy.</p>
       <button onClick={handleLogout} className="px-6 py-4 bg-red-500 text-white font-bold rounded-2xl">Déconnexion</button>
     </div>
   );
 
-  // PAGE MAINTENANCE (sauf admin)
-  // NOTE: le verrouillage global est géré page par page via isPageLocked()
-  // (l'ancien config.isLocked global est remplacé par config.lockedPages)
+  const currentChore = getChores(new Date());
 
   return (
-    <div className="min-h-screen pb-24 md:pb-0 transition-colors duration-700" style={{backgroundColor:"var(--warm-200)"}}>
+    <div
+      className="min-h-screen pb-24 md:pb-0 transition-colors duration-500 relative"
+      style={{ backgroundColor: activeTheme.backgroundColor, color: activeTheme.textColor }}
+    >
+      {/* Motif Alvéoles de fond dynamique */}
+      <Background color={config.primaryColor} />
 
       {/* ── QUIZ POST-LOGIN ── */}
       {pendingQuizId && user && (
         <div className="fixed inset-0 z-[600] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="modal-glass w-full max-w-2xl rounded-[2.5rem] overflow-hidden" style={{maxHeight:'90vh'}}>
             <div className="overflow-y-auto" style={{maxHeight:'90vh'}}>
-              {/* Header avec bouton Passer */}
               <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-white/20"
                 style={{background:'rgba(242,237,228,0.92)',backdropFilter:'blur(20px)'}}>
-                <p className="text-xs font-black uppercase tracking-widest text-gray-500">Questionnaire</p>
+                <p className="text-xs font-black uppercase tracking-widest text-gray-500">Questionnaire de la Ruche</p>
                 <div className="flex items-center gap-2">
-                  {/* Bouton Horloge : reporter à la prochaine connexion */}
                   <button
                     onClick={async () => {
                       if(user?.email && pendingQuizId) {
                         try {
-                          // quiz_postponed = true → sera re-affiché au prochain login
-                          // (on ne met PAS quiz_skipped, donc le quiz sera re-vérifié)
                           await setDoc(doc(db,'user_prefs',user.email),
                             {[`quiz_postponed_${pendingQuizId}`]: true},
                             {merge:true}
@@ -5495,7 +5796,6 @@ useEffect(()=>{
                   >
                     <Clock size={14} className="text-gray-500"/>
                   </button>
-                  {/* Bouton Passer : ignorer définitivement */}
                   <button
                     onClick={async () => {
                       if(user?.email && pendingQuizId) {
@@ -5514,7 +5814,6 @@ useEffect(()=>{
                   </button>
                 </div>
               </div>
-              {/* Contenu du quiz (réutilise le composant PublicQuiz sans le layout full-page) */}
               <InlineQuiz
                 formId={pendingQuizId}
                 config={config}
@@ -5536,20 +5835,18 @@ useEffect(()=>{
         </div>
       )}
 
-      
-
       {/* NOTIFICATIONS PANEL */}
       {isNotifOpen&&(
         <div className="fixed inset-0 z-[150] bg-black/50 backdrop-blur-sm flex justify-end" onClick={()=>setIsNotifOpen(false)}>
           <div className="w-full max-w-sm modal-glass h-full p-6 animate-in slide-in-from-right shadow-2xl overflow-y-auto" onClick={e=>e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-6 px-1">
               <button onClick={()=>setIsNotifOpen(false)} className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500 hover:text-black"><ArrowLeft size={20}/></button>
-              <h3 className="text-2xl font-bold tracking-tight flex items-center gap-2"><Bell className="text-orange-500"/>Notifications</h3>
+              <h3 className="text-2xl font-bold tracking-tight flex items-center gap-2"><Bell className="text-amber-500"/>Bzzz & Alertes</h3>
             </div>
             <div className="space-y-4">
-              {notifications.length===0&&<p className="text-gray-400 italic text-center">Aucune nouvelle notification.</p>}
+              {notifications.length===0&&<p className="text-gray-400 italic text-center">Aucune nouvelle notification dans la ruche.</p>}
               {notifications.map(n=>(
-                <div key={n.id} className={`p-4 rounded-xl border-l-4 ${n.type==='alert'?'bg-red-50 border-red-500':'bg-blue-50 border-blue-500'}`}>
+                <div key={n.id} className={`p-4 rounded-xl border-l-4 ${n.type==='alert'?'bg-red-50 border-red-500':'bg-amber-50 border-amber-500'}`}>
                   <p className="font-bold text-gray-800 mb-2">{n.message}</p>
                   {n.linkView&&<button onClick={()=>handleNotificationClick(n)} className="w-full py-2 bg-black text-white rounded-lg text-xs font-bold uppercase mb-2">Aller voir</button>}
                   <div className="flex justify-between items-center mt-1">
@@ -5574,14 +5871,12 @@ useEffect(()=>{
           <iframe ref={xsiteIframeRef}
           srcDoc={(() => {
             const rawBase = githubConfig?.owner && githubConfig?.repo
-  ? `https://raw.githubusercontent.com/${githubConfig.owner}/${githubConfig.repo}/${githubConfig.branch||'main'}/`
-  : '';
-
-const interceptScript = `<script>
+              ? `https://raw.githubusercontent.com/${githubConfig.owner}/${githubConfig.repo}/${githubConfig.branch||'main'}/`
+              : '';
+            const interceptScript = `<script>
 (function() {
   var _store = {};
   var _rawBase = ${JSON.stringify(rawBase)};
-  // API publique pour les codes XSite
   window.XSite = {
     save: function(key, value) {
       _store[String(key)] = String(value);
@@ -5603,7 +5898,6 @@ const interceptScript = `<script>
       return el;
     }
   };
-  // Proxy localStorage → même API (pour les sites existants)
   try {
     Object.defineProperty(window, 'localStorage', {
       value: {
@@ -5617,14 +5911,12 @@ const interceptScript = `<script>
       writable: false, configurable: true
     });
   } catch(e) {}
-  // Recevoir données initiales
   window.addEventListener('message', function(e) {
     if (e.data && e.data.type === 'XSITE_INIT') {
       _store = Object.assign({}, e.data.data || {});
       window.dispatchEvent(new CustomEvent('xsite-ready', { detail: _store }));
     }
   });
-  // Signaler au parent que le script est prêt à recevoir XSITE_INIT
   try { parent.postMessage({ type: 'XSITE_READY' }, '*'); } catch(e) {}
 })();
 <\/script>`;
@@ -5634,7 +5926,6 @@ const interceptScript = `<script>
           className="flex-1 w-full border-none"
           title={selectedXSite.name}
           onLoad={() => {
-            // Fallback : si XSITE_READY n'arrive pas dans 800ms, envoyer quand même
             if(!user?.email || !selectedXSite?.id) return;
             const siteKey = `${user.email}_${selectedXSite.id}`;
             setTimeout(async () => {
@@ -5647,114 +5938,306 @@ const interceptScript = `<script>
         </div>
       )}
 
-      {/* NAVBAR */}
-      <nav className="fixed top-0 w-full nav-glass z-50 h-20 px-6 flex items-center justify-between">
-        <div onClick={()=>setCurrentView('home')} className="flex items-center gap-3 cursor-pointer">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{backgroundColor:config.primaryColor}}><Home className="text-white" size={20}/></div>
-          <span className="font-cinzel font-black text-xl hidden md:block" style={{color:config.primaryColor}}>CHAUD.DEVANT</span>
-          {/* Couronne plan + tokens */}
+      {/* NAVBAR BEEZY REDESIGNÉE & CLAIRE */}
+      <nav className="fixed top-0 w-full nav-glass z-50 h-20 px-4 md:px-6 flex items-center justify-between border-b border-amber-500/20">
+        <div className="flex items-center gap-3">
+          <div onClick={()=>setCurrentView('home')} className="flex items-center gap-2.5 cursor-pointer group">
+            <div
+              className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg text-2xl group-hover:scale-105 transition-transform"
+              style={{backgroundColor:config.primaryColor}}
+            >
+              🐝
+            </div>
+            <div>
+              <span className="font-cinzel font-black text-lg md:text-xl block leading-none" style={{color:config.primaryColor}}>
+                BEEZY
+              </span>
+              <span className="text-[9px] font-bold uppercase tracking-widest opacity-60 hidden sm:block">
+                {activeTheme.emoji} {activeTheme.name}
+              </span>
+            </div>
+          </div>
+
+          {/* Couronne plan + Gouttes de Miel (Tokens IA) */}
           {user && (
-            <div className="hidden md:flex items-center gap-2">
-              {/* Couronne plan */}
+            <div className="hidden sm:flex items-center gap-2 ml-2">
               {(() => {
                 const isPro = isCurrentUserPremium();
                 return (
                   <button
                     onClick={isPro ? undefined : ()=>setShowFreemiumModal(true)}
                     className={`p-1.5 rounded-full transition-all ${isPro ? 'cursor-default' : 'hover:bg-amber-50 cursor-pointer'}`}
-                    title={isPro ? 'Premium ☕' : 'Passer Premium'}
+                    title={isPro ? 'Reine Premium 👑' : 'Passer Reine Premium'}
                   >
                     <Crown size={18} className={isPro ? 'text-amber-400' : 'text-gray-300'} fill={isPro ? '#fbbf24' : 'none'}/>
                   </button>
                 );
               })()}
-              {/* Badge tokens cliquable */}
               {tokenBalance !== null && (
                 <button
                   onClick={()=>setShowTokenShop(true)}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black border transition-all hover:scale-105 ${
-                    tokenBalance > 200 ? 'bg-green-50 text-green-700 border-green-200' :
-                    tokenBalance > 50  ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                    tokenBalance > 200 ? 'bg-amber-50 text-amber-800 border-amber-300' :
+                    tokenBalance > 50  ? 'bg-orange-50 text-orange-700 border-orange-200' :
                                          'bg-red-50 text-red-700 border-red-200 animate-pulse'
                   }`}
-                  title="Mes tokens IA — cliquer pour recharger"
+                  title="Mes gouttes de miel IA — cliquer pour recharger"
                 >
-                  <Flame size={11}/>
+                  <span>🍯</span>
                   <span>{tokenBalance.toLocaleString('fr-FR')}</span>
                 </button>
               )}
             </div>
           )}
         </div>
-        <div className="flex gap-4 items-center">
-          <div className="hidden md:flex gap-6">
-            {['home','hub','frigo','xsite','recipes','cooking','calendar','tasks','wallet'].map(v=>(
-              <button key={v} onClick={()=>setCurrentView(v)} className="text-xs font-black tracking-widest opacity-40 hover:opacity-100 uppercase" style={{color:currentView===v?config.primaryColor:'inherit'}}>{config.navigationLabels[v as keyof typeof config.navigationLabels]||v}</button>
-            ))}
-          </div>
-          {user && (
-            <div className="md:hidden flex items-center gap-1.5">
-              {/* Couronne mobile */}
-              <button onClick={isCurrentUserPremium() ? undefined : ()=>setShowFreemiumModal(true)} className="p-1">
-                <Crown size={15} className={isCurrentUserPremium() ? 'text-amber-400' : 'text-gray-300'} fill={isCurrentUserPremium() ? '#fbbf24' : 'none'}/>
+
+        {/* Navigation centrale par pilules lisibles */}
+        <div className="hidden xl:flex items-center gap-1.5 bg-white/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-black/5">
+          {[
+            { id: 'home', label: '🏠 Ruche' },
+            { id: 'hub', label: '📋 Tableau' },
+            { id: 'frigo', label: '🧊 Frigo' },
+            { id: 'recipes', label: '👩‍🍳 Recettes' },
+            { id: 'cooking', label: '🗓️ Semainier' },
+            { id: 'tasks', label: '🧹 Corvées' },
+            { id: 'calendar', label: '📅 Agenda' },
+            { id: 'wallet', label: '🪙 Tirelire' },
+            { id: 'wishlist', label: '🎁 WishLists' },
+          ].map(v => {
+            const isActive = currentView === v.id;
+            return (
+              <button
+                key={v.id}
+                onClick={() => setCurrentView(v.id)}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide transition-all ${
+                  isActive ? 'text-white shadow-sm scale-105' : 'opacity-70 hover:opacity-100 hover:bg-black/5'
+                }`}
+                style={isActive ? { backgroundColor: config.primaryColor } : {}}
+              >
+                {v.label}
               </button>
-              {/* Tokens mobile cliquable */}
-              {tokenBalance !== null && (
-                <button
-                  onClick={()=>setShowTokenShop(true)}
-                  className={`flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-black border ${
-                    tokenBalance > 200 ? 'bg-green-50 text-green-700 border-green-200' :
-                    tokenBalance > 50  ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                                         'bg-red-50 text-red-700 border-red-200 animate-pulse'
-                  }`}
-                >
-                  <Flame size={9}/>{tokenBalance.toLocaleString('fr-FR')}
-                </button>
-              )}
-            </div>
-          )}
-<button
+            );
+          })}
+        </div>
+
+        {/* Actions Droite : Sélecteur de Thème, Aide, Notifications, Menu */}
+        <div className="flex gap-2 md:gap-3 items-center">
+          {/* Bouton Thèmes Popover */}
+          <div className="relative">
+            <button
+              onClick={() => setShowThemePicker(!showThemePicker)}
+              className="px-3 py-1.5 rounded-full border border-amber-500/30 bg-white/70 hover:bg-white text-xs font-black flex items-center gap-1.5 shadow-2xs transition-all"
+              title="Changer le thème de la Ruche"
+            >
+              <span>{activeTheme.emoji}</span>
+              <span className="hidden md:inline">Thème</span>
+            </button>
+            {showThemePicker && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-3xl shadow-2xl border border-amber-200 p-3 z-[200] space-y-1.5 animate-in fade-in zoom-in-95">
+                <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 px-2 py-1">
+                  🎨 Personnaliser ma Ruche
+                </p>
+                {Object.values(BEEZY_THEMES).map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => { applyBeezyTheme(t.id); setShowThemePicker(false); }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-2xl text-xs font-bold transition-all ${
+                      activeThemeKey === t.id ? 'bg-amber-100 text-amber-900 font-black' : 'hover:bg-stone-100 text-stone-700'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>{t.emoji}</span>
+                      <span>{t.name}</span>
+                    </span>
+                    <span className="w-3.5 h-3.5 rounded-full border border-black/10" style={{ backgroundColor: t.primaryColor }} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button
             onClick={()=>setShowCommPanel(true)}
-            className="w-8 h-8 rounded-full border-2 border-gray-200 text-gray-400 hover:border-gray-400 hover:text-gray-700 font-black text-sm flex items-center justify-center transition-all"
-            title="Communication & Contact"
+            className="w-8 h-8 rounded-full border-2 border-gray-300 text-gray-500 hover:border-gray-500 hover:text-black font-black text-sm flex items-center justify-center transition-all"
+            title="Communication & Idées"
           >?</button>
-          <button onClick={()=>setIsNotifOpen(true)} className="relative p-2 text-gray-400 hover:text-black transition-colors">
-            <Bell size={24}/>
+
+          <button onClick={()=>setIsNotifOpen(true)} className="relative p-2 text-gray-500 hover:text-black transition-colors">
+            <Bell size={22}/>
             {notifications.length>0&&<span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse"/>}
           </button>
-          <button className="md:hidden" onClick={()=>setIsMenuOpen(true)} style={{color:config.primaryColor}}><Menu size={28}/></button>
-          <button className="hidden md:block" onClick={()=>setIsMenuOpen(true)} style={{color:config.primaryColor}}><Menu size={20}/></button>
+
+          <button
+            onClick={()=>setIsMenuOpen(true)}
+            className="p-2 rounded-xl bg-white/60 border border-black/5 hover:bg-white transition-all"
+            style={{color:config.primaryColor}}
+          >
+            <Menu size={22}/>
+          </button>
         </div>
       </nav>
 
-      <SideMenu config={config} isOpen={isMenuOpen} close={()=>setIsMenuOpen(false)} setView={setCurrentView} logout={handleLogout}/>
-      <BottomNav config={config} view={currentView} setView={setCurrentView}
+      <SideMenu
+        config={config}
+        isOpen={isMenuOpen}
+        close={setIsMenuOpen}
+        setView={setCurrentView}
+        logout={handleLogout}
+        currentView={currentView}
+        activeTheme={activeThemeKey}
+        onSelectTheme={applyBeezyTheme}
+      />
+      <BottomNav
+        config={config}
+        view={currentView}
+        setView={setCurrentView}
         hidden={isMenuOpen||isNotifOpen||isEventModalOpen||isRecipeModalOpen||showFreemiumModal||wishlistModalOpen||showTokenShop||!!adminTokenUser}
       />
 
       <main className="max-w-7xl mx-auto px-3 md:px-6 pt-24 md:pt-28 pb-32 relative z-10">
 
-        {/* ACCUEIL */}
+        {/* ACCUEIL : LA RUCHE (CLARIFIÉE & MARQUÉE ABEILLE) */}
         {currentView==='home'&&(
           isPageLocked('home') ? <MaintenancePage pageName="Accueil" isHome/> : (
-          <div className="space-y-16 animate-in fade-in duration-1000" id="top">
-            <section className="relative h-[45vh] md:h-[60vh] rounded-[2rem] md:rounded-[3rem] overflow-hidden glass-panel shadow-2xl group">
-              <img src={config.welcomeImage} className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110"/>
-              <div className="absolute inset-0 hero-overlay flex flex-col justify-end p-10">
-                <h1 className="text-3xl md:text-8xl font-cinzel font-black text-white leading-none">{config.welcomeTitle}</h1>
-                <p className="text-xl text-white/90 italic mt-4">{config.welcomeText}</p>
-                <button onClick={()=>setCurrentView('hub')} className="mt-8 btn-ghost px-8 py-4 rounded-xl font-bold uppercase tracking-widest shadow-xl flex items-center gap-3 w-fit hover:scale-105 transition-transform"><LayoutDashboard/>Ouvrir le Tableau</button>
+          <div className="space-y-10 animate-in fade-in duration-700" id="top">
+
+            {/* BANDEAU "LE BZZZ DU JOUR" */}
+            <div
+              className="p-4 md:p-5 rounded-3xl border shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 backdrop-blur-md"
+              style={{ backgroundColor: activeTheme.cardBg, borderColor: activeTheme.borderHex }}
+            >
+              <div className="flex items-center gap-3.5">
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-xs"
+                  style={{ backgroundColor: activeTheme.accentBadge }}
+                >
+                  🐝
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full" style={{ backgroundColor: activeTheme.accentBadge, color: config.primaryColor }}>
+                      Le Bzzz du Jour
+                    </span>
+                    {myLetter && (
+                      <span className="text-[10px] font-bold opacity-60">
+                        Abeille connectée : {user.displayName || user.email} ({myLetter})
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm md:text-base font-bold mt-1">{bzzzMessage}</p>
+                </div>
+              </div>
+              <button
+                onClick={updateBzzzMessage}
+                className="self-end sm:self-center px-3.5 py-2 rounded-xl text-xs font-black border hover:scale-105 transition-all shrink-0"
+                style={{ borderColor: activeTheme.borderHex, color: config.primaryColor }}
+              >
+                ✏️ Modifier le Bzzz
+              </button>
+            </div>
+
+            {/* BANNIÈRE HERO DE LA RUCHE */}
+            <section className="relative h-[38vh] md:h-[48vh] rounded-[2.5rem] overflow-hidden glass-panel shadow-2xl group border border-amber-500/20">
+              <img src={config.welcomeImage} className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-105" alt="Famille"/>
+              <div className="absolute inset-0 hero-overlay flex flex-col justify-end p-6 md:p-10">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-3 py-1 rounded-full bg-amber-400 text-stone-950 font-black text-[10px] uppercase tracking-widest">
+                    🍯 Hub Familial Beezy
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white font-bold text-[10px]">
+                    {recipes.length} Recettes • {events.length} Événements
+                  </span>
+                </div>
+                <h1 className="text-3xl md:text-6xl font-cinzel font-black text-white leading-none">{config.welcomeTitle}</h1>
+                <p className="text-sm md:text-lg text-white/90 font-medium mt-2 max-w-2xl">{config.welcomeText}</p>
+                <div className="flex flex-wrap gap-3 mt-5">
+                  <button
+                    onClick={()=>setCurrentView('hub')}
+                    className="px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow-xl flex items-center gap-2 text-white hover:scale-105 transition-transform"
+                    style={{ backgroundColor: config.primaryColor }}
+                  >
+                    <LayoutDashboard size={16}/> Ouvrir le Tableau
+                  </button>
+                  <button
+                    onClick={()=>setCurrentView('cooking')}
+                    className="btn-ghost px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow-xl flex items-center gap-2 hover:scale-105 transition-transform"
+                  >
+                    <CalIcon size={16}/> Voir le Semainier
+                  </button>
+                </div>
               </div>
             </section>
+
+            {/* RÉSUMÉ EXPRESS DE LA SEMAINE (CORVÉES + AGENDA + REPAS) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div
+                onClick={() => setCurrentView('tasks')}
+                className="p-5 rounded-3xl border cursor-pointer hover:scale-[1.01] transition-all flex items-center justify-between"
+                style={{ backgroundColor: activeTheme.cardBg, borderColor: activeTheme.borderHex }}
+              >
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-60">🧹 Corvées Samedi ({currentChore.dateStr})</span>
+                  <div className="flex gap-3 mt-2 text-xs font-black">
+                    <span className="px-2.5 py-1 rounded-xl bg-amber-500/15">Haut : {currentChore.haut}</span>
+                    <span className="px-2.5 py-1 rounded-xl bg-amber-500/15">Bas : {currentChore.bas}</span>
+                    <span className="px-2.5 py-1 rounded-xl bg-amber-500/15">Douche : {currentChore.douche}</span>
+                  </div>
+                </div>
+                <ChevronRight size={18} style={{ color: config.primaryColor }} />
+              </div>
+
+              <div
+                onClick={() => setCurrentView('calendar')}
+                className="p-5 rounded-3xl border cursor-pointer hover:scale-[1.01] transition-all flex items-center justify-between"
+                style={{ backgroundColor: activeTheme.cardBg, borderColor: activeTheme.borderHex }}
+              >
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-60">📅 Prochain Événement</span>
+                  <p className="text-sm font-black mt-1 truncate">
+                    {events.find(e => e.date >= new Date().toISOString().split('T')[0])?.title || 'Aucun événement imminent'}
+                  </p>
+                </div>
+                <ChevronRight size={18} style={{ color: config.primaryColor }} />
+              </div>
+
+              <div
+                onClick={() => setShowThemePicker(true)}
+                className="p-5 rounded-3xl border cursor-pointer hover:scale-[1.01] transition-all flex items-center justify-between"
+                style={{ backgroundColor: activeTheme.cardBg, borderColor: activeTheme.borderHex }}
+              >
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-60">🎨 Thème Actif</span>
+                  <p className="text-sm font-black mt-1 flex items-center gap-2">
+                    <span>{activeTheme.emoji}</span>
+                    <span>{activeTheme.name}</span>
+                  </p>
+                </div>
+                <Sparkles size={18} style={{ color: config.primaryColor }} />
+              </div>
+            </div>
+
             {config.homeHtml&&(
               <section id="home-widget" className="glass-panel overflow-hidden mb-8 border-0">
                 <iframe srcDoc={config.homeHtml} className="w-full h-[500px]" sandbox="allow-scripts" title="Home Widget"/>
               </section>
             )}
-            <div className="grid md:grid-cols-3 gap-8" id="home-shortcuts">
-              <HomeCard icon={<LayoutDashboard size={40}/>} title="Tableau" label="Courses & Notes" onClick={()=>setCurrentView('hub')} color={config.primaryColor}/>
-              <HomeCard icon={<Refrigerator size={40}/>} title="Frigo" label="Inventaire & Anti-gaspi" onClick={()=>setCurrentView('frigo')} color={config.primaryColor}/>
-              <HomeCard icon={<ChefHat size={40}/>} title="Recettes" label="Nos petits plats" onClick={()=>setCurrentView('recipes')} color={config.primaryColor}/>
+
+            {/* GRILLE COMPLÈTE DES ALVÉOLES DE LA RUCHE */}
+            <div>
+              <div className="flex items-center justify-between mb-4 px-1">
+                <h2 className="text-lg md:text-2xl font-black tracking-tight flex items-center gap-2">
+                  <span>🍯</span> Les Alvéoles de la Ruche
+                </h2>
+                <span className="text-xs font-bold opacity-60">Accès direct à tous les outils</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="home-shortcuts">
+                <HomeCard icon={<LayoutDashboard size={32}/>} title="Le Tableau" label="Courses, Pense-bêtes & Majordome IA" badge="Hub Central" onClick={()=>setCurrentView('hub')} color={config.primaryColor}/>
+                <HomeCard icon={<Refrigerator size={32}/>} title="Frigo & Cellier" label="Inventaire, Scan Ticket & Anti-gaspi" badge="Intelligent" onClick={()=>setCurrentView('frigo')} color={config.primaryColor}/>
+                <HomeCard icon={<ChefHat size={32}/>} title="Recettes" label="Livre de cuisine & Guide MiamSteps" badge={`${recipes.length} plats`} onClick={()=>setCurrentView('recipes')} color={config.primaryColor}/>
+                <HomeCard icon={<CalIcon size={32}/>} title="Semainier" label="Planning des repas Midi & Soir" badge="Semaine" onClick={()=>setCurrentView('cooking')} color={config.primaryColor}/>
+                <HomeCard icon={<CheckSquare size={32}/>} title="Corvées" label="Rotation Haut, Bas & Douche du samedi" badge="Missions" onClick={()=>setCurrentView('tasks')} color={config.primaryColor}/>
+                <HomeCard icon={<Wallet size={32}/>} title="Tirelire" label="Solde personnel, Objectifs & Dettes" badge="Porte-monnaie" onClick={()=>setCurrentView('wallet')} color={config.primaryColor}/>
+              </div>
             </div>
           </div>
           )
@@ -5782,8 +6265,9 @@ const interceptScript = `<script>
             onClose={()=>setAdminTokenUser(null)}
           />
         )}
-	{/* PANEL COMMUNICATION */}
-       		  {showCommPanel&&<CommPanel config={config} user={user} onClose={()=>setShowCommPanel(false)}/>}
+
+        {/* PANEL COMMUNICATION */}
+        {showCommPanel&&<CommPanel config={config} user={user} onClose={()=>setShowCommPanel(false)}/>}
 
         {/* HUB */}
         {currentView==='hub'&&(isPageLocked('hub')?<MaintenancePage pageName="Le Tableau"/>:(
@@ -5811,9 +6295,9 @@ const interceptScript = `<script>
         {currentView==='frigo'&&(
           isPageLocked('frigo') ? <MaintenancePage pageName="Frigo"/> : (
           <div className="space-y-6">
-            <div className="flex flex-col items-center gap-4">
-              <h2 className="text-2xl md:text-5xl font-black tracking-tight text-center" style={{color:config.primaryColor}}>MON FRIGO</h2>
-              <p className="text-gray-500 italic text-sm">Inventaire intelligent & gestion anti-gaspi</p>
+            <div className="flex flex-col items-center gap-2">
+              <h2 className="text-2xl md:text-5xl font-black tracking-tight text-center" style={{color:config.primaryColor}}>🧊 FRIGO & CELLIER DE LA RUCHE</h2>
+              <p className="text-gray-500 italic text-sm">Inventaire intelligent, scan ticket IA & gestion anti-gaspi</p>
             </div>
             <FrigoView user={user} config={config} isPremium={isCurrentUserPremium()} onShowFreemium={()=>setShowFreemiumModal(true)} consumeTokens={consumeTokens}/>
           </div>
@@ -5833,11 +6317,11 @@ const interceptScript = `<script>
         )}
 
         {/* TÂCHES */}
-       {currentView==='tasks'&&(
-  isPageLocked('tasks')
-    ? <MaintenancePage pageName="Tâches"/>
-    : <TasksChoresView config={config} myLetter={myLetter} choreStatus={choreStatus} toggleChore={toggleChore}/>
-)}
+        {currentView==='tasks'&&(
+          isPageLocked('tasks')
+            ? <MaintenancePage pageName="Tâches"/>
+            : <TasksChoresView config={config} myLetter={myLetter} choreStatus={choreStatus} toggleChore={toggleChore}/>
+        )}
 
         {/* CALENDRIER */}
         {currentView==='calendar'&&(isPageLocked('calendar') ? <MaintenancePage pageName="Calendrier"/> : (
@@ -5857,15 +6341,17 @@ const interceptScript = `<script>
             {!selectedXSite&&(
               (user.email===ADMIN_EMAIL||favorites.length>0)?(
                 <>
-                  <div className="flex flex-col items-center gap-6">
-                    <h2 className="text-2xl md:text-5xl font-black tracking-tight text-center" style={{color:config.primaryColor}}>MES FAVORIS</h2>
-                    <p className="text-gray-400 italic">Vos accès rapides XSite</p>
+                  <div className="flex flex-col items-center gap-4">
+                    <h2 className="text-2xl md:text-5xl font-black tracking-tight text-center" style={{color:config.primaryColor}}>🌐 MES APPLICATIONS XSITE</h2>
+                    <p className="text-gray-400 italic">Vos mini-sites et outils familiaux embarqués</p>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                     {xsitePages.filter(p=>user.email===ADMIN_EMAIL?true:favorites.includes(p.id)).map(site=>(
                       <div key={site.id} onClick={()=>setSelectedXSite(site)} className="bg-white p-8 rounded-[2rem] shadow-lg border border-gray-100 cursor-pointer hover:scale-105 transition-transform group">
                         <div className="flex items-center justify-between mb-4">
-                          <div className="p-3 bg-white/35 rounded-full group-hover:bg-black group-hover:text-white transition-colors"><Map size={24}/></div>
+
+<Map size={24}/>
+<div className="p-3 bg-amber-50 rounded-full group-hover:bg-black group-hover:text-white transition-colors"></div>
                           <ArrowLeft size={20} className="rotate-180 opacity-0 group-hover:opacity-50"/>
                         </div>
                         <h3 className="text-xl font-bold uppercase tracking-wide">{site.name}</h3>
@@ -5894,13 +6380,11 @@ const interceptScript = `<script>
             <RecipeModal isOpen={isRecipeModalOpen} onClose={setIsRecipeModalOpen} config={config} currentRecipe={currentRecipe} setCurrentRecipe={setCurrentRecipe} updateEntry={updateEntry} addEntry={addEntry}/>
 
             {recipeView==='list' ? (
-              /* ─── VUE LISTE (style MiamSteps) ─── */
               <div className="space-y-8">
-                {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-3xl md:text-4xl font-black tracking-tight" style={{color:config.primaryColor}}>Nos Recettes</h2>
-                    <p className="text-gray-400 text-sm mt-1">Choisissez une recette et suivez le guide pas à pas</p>
+                    <h2 className="text-3xl md:text-4xl font-black tracking-tight" style={{color:config.primaryColor}}>🍯 Les Recettes de la Ruche</h2>
+                    <p className="text-gray-400 text-sm mt-1">Choisissez une recette et suivez le guide pas à pas MiamSteps</p>
                   </div>
                   {!isCurrentUserPremium()&&recipes.length>=15 ? (
                     <button onClick={()=>setShowFreemiumModal(true)} className="flex items-center gap-2 px-6 py-3 text-white rounded-2xl font-bold text-sm hover:scale-105 transition-transform shadow-lg" style={{backgroundColor:config.primaryColor}}>☕ Débloquer illimité</button>
@@ -5911,9 +6395,8 @@ const interceptScript = `<script>
                     </button>
                   )}
                 </div>
-                {/* Filtres */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <input value={recipeFilter} onChange={e=>setRecipeFilter(e.target.value)} placeholder="🔍 Rechercher…" className="flex-1 p-3 rounded-xl border border-gray-200 bg-white outline-none text-sm font-bold"/>
+                  <input value={recipeFilter} onChange={e=>setRecipeFilter(e.target.value)} placeholder="🔍 Rechercher une recette ou un chef…" className="flex-1 p-3 rounded-xl border border-gray-200 bg-white outline-none text-sm font-bold"/>
                   <div className="flex gap-2 overflow-x-auto pb-1">
                     {['all','entrée','plat','dessert','autre'].map(cat=>(
                       <button key={cat} onClick={()=>setRecipeCategory(cat)}
@@ -5923,7 +6406,6 @@ const interceptScript = `<script>
                     ))}
                   </div>
                 </div>
-                {/* Grille recettes */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {(() => {
                     const filtered = recipes.filter((r:any)=>{
@@ -5933,7 +6415,6 @@ const interceptScript = `<script>
                     });
                     if(filtered.length===0) return <p className="col-span-full text-center text-gray-400 py-16 italic">Aucune recette trouvée.</p>;
                     return filtered.map((r:any)=>{
-                      const ings = typeof r.ingredients==='string' ? r.ingredients.split('\n').filter((i:string)=>i.trim()!=='') : (r.ingredients||[]);
                       return (
                         <div key={r.id} className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden border border-gray-100 group flex flex-col"
                           onClick={()=>{
@@ -5941,7 +6422,6 @@ const interceptScript = `<script>
                             setReadingRecipe({...r, ingredients: ingsArr});
                             setRecipeView('read');
                           }}>
-                          {/* Image ou couleur */}
                           <div className="h-44 overflow-hidden relative flex items-center justify-center" style={{backgroundColor:config.primaryColor+'22'}}>
                             {r.image
                               ? <img src={r.image} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
@@ -5949,19 +6429,19 @@ const interceptScript = `<script>
                             }
                             {r.cookTime&&<div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-gray-700 flex items-center gap-1"><Clock size={11}/>{r.cookTime}</div>}
                             <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={e=>{e.stopPropagation();addRecipeToHub(r);}} className="p-1.5 bg-white/90 rounded-full shadow text-orange-500 hover:scale-110 transition-transform"><ShoppingBag size={13}/></button>
+                              <button onClick={e=>{e.stopPropagation();addRecipeToHub(r);}} className="p-1.5 bg-white/90 rounded-full shadow text-amber-600 hover:scale-110 transition-transform"><ShoppingBag size={13}/></button>
                               <button onClick={e=>{e.stopPropagation();openEditRecipe(r);}} className="p-1.5 bg-white/90 rounded-full shadow text-blue-500 hover:scale-110 transition-transform"><Pencil size={13}/></button>
                               <button onClick={e=>{e.stopPropagation();deleteItem('family_recipes',r.id);}} className="p-1.5 bg-white/90 rounded-full shadow text-red-500 hover:scale-110 transition-transform"><Trash2 size={13}/></button>
                             </div>
                           </div>
                           <div className="p-5 flex flex-col flex-grow">
-                            <h3 className="text-lg font-bold text-gray-800 mb-1 leading-tight group-hover:text-orange-600 transition-colors">{r.title}</h3>
+                            <h3 className="text-lg font-bold text-gray-800 mb-1 leading-tight group-hover:text-amber-600 transition-colors">{r.title}</h3>
                             {r.description&&<p className="text-gray-400 text-sm mb-3 line-clamp-2 flex-grow">{r.description}</p>}
                             <div className="flex items-center justify-between text-xs text-gray-400 mt-auto pt-3 border-t border-gray-100">
                               <div className="flex gap-3">
-                                {r.chef&&<span className="flex items-center gap-1"><ChefHat size={13} className="text-orange-400"/>{r.chef}</span>}
-                                {r.prepTime&&<span className="flex items-center gap-1"><Clock size={13} className="text-orange-400"/>{r.prepTime}</span>}
-                                {r.servings&&<span className="flex items-center gap-1"><Users size={13} className="text-orange-400"/>{r.servings}p.</span>}
+                                {r.chef&&<span className="flex items-center gap-1"><ChefHat size={13} className="text-amber-500"/>{r.chef}</span>}
+                                {r.prepTime&&<span className="flex items-center gap-1"><Clock size={13} className="text-amber-500"/>{r.prepTime}</span>}
+                                {r.servings&&<span className="flex items-center gap-1"><Users size={13} className="text-amber-500"/>{r.servings}p.</span>}
                               </div>
                               <span className="capitalize text-gray-300 text-[10px] font-bold uppercase">{r.category}</span>
                             </div>
@@ -5973,13 +6453,12 @@ const interceptScript = `<script>
                 </div>
               </div>
             ) : (
-              /* ─── VUE LECTURE PAS À PAS ─── */
               readingRecipe && <MiamStepsReader recipe={readingRecipe} config={config} onBack={()=>{setRecipeView('list');setReadingRecipe(null);}} onEdit={()=>{openEditRecipe(readingRecipe);setRecipeView('list');}}/>
             )}
           </div>
         ))}
 
-        {/* SEMAINIER — intégré directement dans l'app */}
+        {/* SEMAINIER */}
         {currentView==='cooking'&&(isPageLocked('cooking') ? <MaintenancePage pageName="Semainier"/> : (
           <div className="space-y-0 animate-in fade-in" id="cooking-frame">
             <div className="glass-panel overflow-hidden" style={{minHeight:'800px'}}>
@@ -6003,7 +6482,6 @@ const interceptScript = `<script>
             </div>
           </div>
         ))}
-
 
         {/* ADMIN */}
         {currentView==='edit'&&(
